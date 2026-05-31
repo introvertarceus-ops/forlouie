@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>For Beanie</title>
+
+  <style>
+  body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: black;
+  cursor: url(http://www.rw-designer.com/cursor-extern.php?id=152330), auto;
+}
+
+  #password-screen {
+  text-align: center;
+  color: rgb(4, 66, 24);
+  font-family: Georgia, serif;
+  size: medium;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("passbg.png");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease;
+}
+
+  #password-input {
+    display: block;
+    margin: 12px auto;
+    padding: 10px;
+    font-size: 16px;
+    text-align: center;
+    border: 4px solid white;
+    background: transparent;
+    color: rgb(11, 4, 4);
+    outline: none;
+  }
+
+  #hint {
+    font-size: 13px;
+    font-weight: bold;
+    color: #252525;
+    margin-top: 8px;
+  }
+
+  #error-message {
+    color: #ff6b6b;
+    font-size: 13px;
+    display: none;
+    font-weight: bold;
+  }
+
+  button {
+    margin-top: 16px;
+    padding: 6px 22px;
+    font-size: 15px;
+    font-weight: bold;
+    background: transparent;
+    color: white;
+    border: 3px solid white;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: white;
+    color: #1a1a2e;
+  }
+
+  #intro-screen {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("stardew1.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: black;
+  text-align: center;
+  padding: 40px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 4s ease;
+}
+
+#intro-text {
+  color: white;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  line-height: 1.9;
+  max-width: 600px;
+  opacity: 0;
+  transition: opacity 2s ease;
+  align-items: center;
+}
+
+#next-btn {
+  margin-top: 20px;
+  padding: 6px 22px;
+  font-size: 15px;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+}
+
+#next-btn:hover {
+  background: white;
+  color: black;
+}
+
+#junimo {
+  position: fixed;
+  bottom: 50%;
+  transform: translateY(50%);
+  left: -100px;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transition: left 1.5s ease;
+  display: none;
+}
+
+#zipper-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 50%;
+  background-color: black;
+  transition: width 1.5s ease;
+  z-index: 9;
+}
+
+#zipper-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 50%;
+  background-color: black;
+  transition: width 1.5s ease;
+  z-index: 9;
+}
+  #room-screen {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("room.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+#dialogue-box {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40%; 
+  background: rgba(20, 50, 20, 0.92);
+  border: 3px solid #a0c878;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 1s ease;
+  cursor: pointer;
+}
+
+
+#krobus-portrait {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  border: 2px solid #a0c878;
+  background: rgba(0,0,0,0.3);
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+#dialogue-text p {
+  color: #e8f5d0;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0;
+  transition: opacity 0.4s ease;
+}
+#computer-hitbox {
+  position: absolute;
+  left: 20%;
+  top: 40%;
+  width: 10%;
+  height: 20%;
+  cursor: pointer;
+}
+
+#next-dialogue {
+  position: absolute;
+  bottom: 10px;
+  right: 16px;
+  color: #a0c878;
+  font-size: 14px;
+  animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(4px); }
+}
+
+#choice-yes:hover, #choice-no:hover {
+  background: rgba(100,180,70,0.2);
+}
+
+</style>
+</head>
+<body>
+  <audio id="click-sound" src="click.mp3" preload="auto"></audio>
+  <div id="password-screen">
+    <h1>ENTER PASSWORD</h1>
+    <input type="password" id="password-input" placeholder="..."/>
+    <p id="hint">Hint: You are not only called Erin, you are also called - </p>
+    <p id="error-message">Wrong password. Try again.</p>
+    <button onclick="checkPassword()">ENTER</button>
+    
+  </div>
+
+  <div id="intro-screen">
+
+  <div id="zipper-top"></div>
+  <div id="zipper-bottom"></div>
+
+    <p id="intro-text"></p>
+    <img id="junimo" src="junimo.png" alt="Junimo" />
+    <button id="next-btn" onclick="goToRoom()">Next</button>
+  </div>
+
+ <div id="room-screen">
+  <div id="dialogue-box" onclick="handleDialogueClick()">
+    <img id="krobus-portrait" src="krobus.png" alt="Krobus" />
+    <div id="dialogue-text">
+      <p id="dialogue-p">This is my ill attempt at recreating our lounge in Minecraft.</p>
+    </div>
+    <div id="next-dialogue">Click ▼</div>
+  </div>
+
+  <div id="choice-box" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:50%; background:rgba(20,50,20,0.92); border:3px solid #a0c878; border-radius:8px; padding:16px; box-sizing:border-box; font-family:Georgia,serif;">
+    <p style="color:#e8f5d0; font-size:14px; margin-bottom:12px; text-align:center;">— Choose —</p>
+    <div id="choice-yes" onclick="chooseFarewell()" style="color:#e8f5d0; font-size:14px; padding:8px 12px; cursor:pointer; border:1px solid #a0c878; border-radius:4px; margin-bottom:8px; text-align:center; transition:background 0.2s;">
+      Yes, time to bid farewell.
+    </div>
+    <div id="choice-no" onclick="chooseStay()" style="color:#e8f5d0; font-size:14px; padding:8px 12px; cursor:pointer; border:1px solid #a0c878; border-radius:4px; text-align:center; transition:background 0.2s;">
+      Let me take one last look — the road can wait a little longer.
+    </div>
+  </div>
+
+  <div id="computer-hitbox" onclick="goToComputer()"></div>
+</div>
+
+<div id="final-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:50; background:black;">
+  
+  <video id="final-video" src="car.mp4" style="width:100%; height:100%; object-fit:cover;" loop muted></video>
+
+  <p id="farewell-text" style="
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    color:white; font-family:Georgia,serif; font-size:20px; line-height:1.9;
+    text-align:center; max-width:600px; opacity:0;
+    transition:opacity 2s ease;
+    text-shadow: 1px 1px 4px black;
+  "></p>
+
+ 
+  <div id="blind-left" style="position:absolute; top:0; left:0; width:50%; height:100%; background:black; z-index:10; transition: transform 1.5s ease;"></div>
+  <div id="blind-right" style="position:absolute; top:0; right:0; width:50%; height:100%; background:black; z-index:10; transition: transform 1.5s ease;"></div>
+
+ 
+  <div id="final-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:black; opacity:0; transition:opacity 3s ease; z-index:20; pointer-events:none;"></div>
+</div>
+
+<audio id="farewell-song" src="song.mp3" loop></audio>
+
+<script>
+
+if (new URLSearchParams(window.location.search).get('fromcomputer') === 'true') {
+  document.getElementById('password-screen').style.display = 'none';
+}
+const normalDialogue = [
+  "There's a computer in our lounge that I've always been curious about.",
+  "I've never seen it turned on, but it's always there... waiting.",
+  "I figured I have nothing to lose by taking the step, and who knows, maybe it'll have something interesting for me to see.",
+  "And it did.",
+  "And I enjoyed every moment that I spent browsing through it.",
+  "Now it's time for someone else to have that experience. I hope they enjoy it as much as I did.",
+  "I left behind some things for you to find.",
+  "Click on the computer to see for yourself.",
+  "PS. This is my ill attempt at recreating our lounge in Minecraft."
+
+];
+
+const logoutDialogue = [
+  "Well, that's about all I have to say. ",
+  "I hope you enjoyed your time here.",
+  "Take care of yourself out there, and I hope the road ahead is full of wonderful things for you to discover.",
+  "Ready for your journey?"
+];
+
+const secondLogoutDialogue = [
+  "Now, are you ready?"
+];
+
+let dialogueIndex = 0;
+let currentDialogueSet = normalDialogue;
+let isLogoutFlow = false;
+let hasLoggedOutBefore = sessionStorage.getItem('hasLoggedOut') === 'true';
+
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('fromcomputer') === 'true') {
+    document.getElementById('password-screen').style.display = 'none';
+    const room = document.getElementById('room-screen');
+    room.style.display = 'block';
+    setTimeout(() => {
+      room.style.opacity = 1;
+      startLogoutDialogue();
+    }, 100);
+  }
+});
+
+function checkPassword() {
+  const input = document.getElementById('password-input').value;
+  const error = document.getElementById('error-message');
+  if (input.toLowerCase() === 'louie') {
+    const ps = document.getElementById('password-screen');
+    ps.style.opacity = '0';
+    setTimeout(() => { ps.style.display = 'none'; }, 300);
+    const intro = document.getElementById('intro-screen');
+    intro.style.display = 'flex';
+    setTimeout(() => {
+      intro.style.opacity = 1;
+      setTimeout(startIntro, 2000);
+    }, 100);
+  } else {
+    error.style.display = 'block';
+  }
+}
+
+document.getElementById('password-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPassword();
+});
+
+document.addEventListener('click', function() {
+  const ps = document.getElementById('password-screen');
+  if (ps && ps.style.display === 'none') {
+    const sound = document.getElementById('click-sound');
+    sound.currentTime = 0;
+    sound.play();
+  }
+});
+
+function startIntro() {
+  const lines = [
+    "For my once classmate, Louie.",
+    "I know you may have started your voyage now, but I wanted to give you a late send-off in the form of this little website.",
+    "For all the things I wish I said in all of the silences;",
+    "For all the things I wish I could say in person;",
+    "I hope this can be a small vessel to carry with you on your journey.",
+    "On we go!"
+  ];
+  const textEl = document.getElementById('intro-text');
+  const btn = document.getElementById('next-btn');
+  let i = 0;
+
+  function showNext() {
+    if (i < lines.length) {
+      textEl.style.opacity = 0;
+      setTimeout(() => {
+        textEl.textContent = lines[i];
+        textEl.style.opacity = 1;
+        i++;
+        setTimeout(showNext, 5000);
+      }, 1500);
+    } else {
+      btn.style.opacity = 1;
+      btn.style.pointerEvents = 'auto';
+      document.getElementById('junimo').style.opacity = 1;
+    }
+  }
+  showNext();
+}
+
+function goToRoom() {
+  document.getElementById('intro-text').style.opacity = '0';
+  document.getElementById('next-btn').style.opacity = '0';
+
+  const junimo = document.getElementById('junimo');
+  const pop = new Audio('pop.mp3');
+  pop.play();
+
+  junimo.style.display = 'block';
+  setTimeout(() => { junimo.style.left = 'calc(100% + 100px)'; }, 400);
+
+  setTimeout(() => {
+    junimo.style.display = 'none';
+    document.getElementById('zipper-top').style.width = '100%';
+    document.getElementById('zipper-bottom').style.width = '100%';
+  }, 1700);
+
+  setTimeout(() => {
+    const room = document.getElementById('room-screen');
+    document.getElementById('intro-screen').style.display = 'none';
+    room.style.display = 'block';
+    setTimeout(() => {
+      room.style.opacity = 1;
+      setTimeout(() => {
+        startNormalDialogue();
+      }, 2000);
+    }, 100);
+  }, 2800);
+}
+
+function startNormalDialogue() {
+  dialogueIndex = 0;
+  currentDialogueSet = normalDialogue;
+  isLogoutFlow = false;
+  document.getElementById('dialogue-p').textContent = currentDialogueSet[0];
+  document.getElementById('dialogue-box').style.opacity = '1';
+  document.getElementById('next-dialogue').style.display = 'block';
+}
+
+function startLogoutDialogue() {
+  dialogueIndex = 0;
+  isLogoutFlow = true;
+  currentDialogueSet = hasLoggedOutBefore ? secondLogoutDialogue : logoutDialogue;
+  document.getElementById('dialogue-p').textContent = currentDialogueSet[0];
+  document.getElementById('dialogue-box').style.opacity = '1';
+  document.getElementById('next-dialogue').style.display = 'block';
+  document.getElementById('choice-box').style.display = 'none';
+}
+
+function handleDialogueClick() {
+  dialogueIndex++;
+  const box = document.getElementById('dialogue-box');
+  const text = document.getElementById('dialogue-p');
+
+  if (dialogueIndex < currentDialogueSet.length) {
+    text.style.opacity = '0';
+    setTimeout(() => {
+      text.textContent = currentDialogueSet[dialogueIndex];
+      text.style.opacity = '1';
+    }, 400);
+  } else {
+    // end of dialogue
+    if (isLogoutFlow) {
+      box.style.opacity = '0';
+      setTimeout(() => {
+        box.style.display = 'none';
+        document.getElementById('choice-box').style.display = 'block';
+      }, 500);
+    } else {
+      box.style.opacity = '0';
+      setTimeout(() => { box.style.display = 'none'; }, 500);
+    }
+  }
+}
+
+function chooseStay() {
+  document.getElementById('choice-box').style.display = 'none';
+  sessionStorage.setItem('hasLoggedOut', 'true');
+  hasLoggedOutBefore = true;
+
+  const box = document.getElementById('dialogue-box');
+  const text = document.getElementById('dialogue-p');
+  box.style.display = 'flex';
+  box.onclick = null; // disable clicking through
+  text.textContent = "Okay, one last trip to the computer then!";
+  text.style.opacity = '1';
+  document.getElementById('next-dialogue').style.display = 'none';
+  box.style.opacity = '1';
+
+  setTimeout(() => {
+    box.style.opacity = '0';
+    setTimeout(() => {
+      goToComputer();
+    }, 600);
+  }, 2500);
+}
+
+function chooseFarewell() {
+  document.getElementById('choice-box').style.display = 'none';
+  startFinalScene();
+}
+
+function goToComputer() {
+  window.location.href = 'computer.html';
+}
+
+function startFinalScene() {
+  const final = document.getElementById('final-screen');
+  document.getElementById('room-screen').style.display = 'none';
+  final.style.display = 'block';
+
+  const video = document.getElementById('final-video');
+
+  const overlay = document.getElementById('final-overlay');
+  overlay.style.transition = 'opacity 1.5s ease';
+  overlay.style.opacity = '1';
+
+  setTimeout(() => {
+    video.muted = false;
+    video.play();
+  
+    setTimeout(() => {
+      document.getElementById('blind-left').style.transform = 'translateX(-100%)';
+      document.getElementById('blind-right').style.transform = 'translateX(100%)';
+      overlay.style.opacity = '0';
+    }, 500);
+
+    setTimeout(() => {
+  const song = document.getElementById('farewell-song');
+  song.loop = false;
+  song.play();
+
+  // fade out when the song naturally ends
+  song.addEventListener('ended', () => {
+    overlay.style.transition = 'opacity 3s ease';
+    overlay.style.opacity = '1';
+  });
+  }, 2000); 
+
+  }, 2500); 
+} 
+
+</script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Computer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      background-image: url('suv2.png');
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+      cursor: url(http://www.rw-designer.com/cursor-extern.php?id=152330), auto;
+    }
+
+    #desktop-icons {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 80px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .icon span.emoji {
+      font-size: 50px;
+      image-rendering: pixelated;
+    }
+
+    .icon span.label {
+      font-size: 11px;
+      color: white;
+      text-shadow: 1px 1px 2px black;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .icon:hover span.emoji { filter: brightness(1.3); }
+
+    #logout-btn {
+      position: absolute;
+      top: 90%;
+      right: 20px;
+      background: rgba(180, 40, 40, 0.85);
+      color: white;
+      border: 3px solid #ff6b6b;
+      padding: 6px 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    #logout-btn:hover { background: rgba(220, 60, 60, 0.95); }
+
+    .popup {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      max-height: 70vh;
+      background: #c0c0c0;
+      border: 2px solid #000;
+      box-shadow: 4px 4px 0px #000;
+      z-index: 100;
+      flex-direction: column;
+    }
+
+    .popup.active { display: flex; }
+
+    .popup-titlebar {
+      background: #000080;
+      color: white;
+      padding: 4px 8px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    .popup-close {
+      background: #c0c0c0;
+      color: black;
+      border: 2px solid;
+      border-color: white #000 #000 white;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .popup-close:hover { background: #ff4444; color: white; }
+
+    .popup-body {
+      padding: 16px;
+      overflow-y: auto;
+      background: white;
+      flex: 1;
+    }
+
+    .popup-body p { font-size: 14px; line-height: 1.8; color: #111; }
+
+    .letter-body {
+      font-family: Georgia, serif;
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.9;
+      color: #1a1a1a;
+    }
+
+    .Shows-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 12px;
+    }
+
+    .Shows-item img { width: 100px; height: 100px; object-fit: cover; border: 1px solid #aaa; }
+    .Shows-item p { font-size: 13px; margin: 0; }
+
+    #flower-popup .popup-body { text-align: center; }
+    #flower-popup img { width: 180px; margin: 10px auto; display: block; }
+
+    #stardew-popup .popup-body { text-align: center; background-color: white; }
+    #stardew-popup img { width: 200px; margin: 10px auto; display: block; image-rendering: pixelated; }
+
+    #overlay {
+      display: none;  
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 99;
+    }
+
+    #overlay.active { display: block; }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @keyframes runAcross {
+      0%   { left: 10%; transform: scaleX(1); }
+      49%  { left: 85%; transform: scaleX(1); }
+      50%  { left: 85%; transform: scaleX(-1); }
+      99%  { left: 10%; transform: scaleX(-1); }
+      100% { left: 10%; transform: scaleX(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="audio-player"></audio>
+
+  <div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <img id="loading-junimo" src="junimo.png" alt="Junimo" style="width: 64px; height: 64px; image-rendering: pixelated;" />
+    <p style="color: #555; font-family: 'Courier New'; font-size: 12px; margin-top: 24px; letter-spacing: 0.1em;">loading...</p>
+  </div>
+
+  <div id="desktop-icons">
+    <div class="icon" onclick="openPopup('letter1-popup')"><span class="emoji">💌</span><span class="label">Letter 1</span></div>
+    <div class="icon" onclick="openPopup('letter2-popup')"><span class="emoji">✉️</span><span class="label">Letter 2</span></div>
+    <div class="icon" onclick="openPopup('stardew-popup')"><span class="emoji">🖼️</span><span class="label">Portrait</span></div>
+    <div class="icon" onclick="openPopup('playlist-popup')"><span class="emoji">🎵</span><span class="label">Playlist</span></div>
+    <div class="icon" onclick="openPopup('Shows-popup')"><span class="emoji">📺</span><span class="label">Shows</span></div>
+    <div class="icon" onclick="openPopup('flower-popup')"><span class="emoji">🌸</span><span class="label">Flower</span></div>
+  </div>
+
+  <button id="logout-btn" onclick="logout()">⏻</button>
+  <div id="overlay" onclick="closeAll()"></div>
+
+  <div class="popup" id="letter1-popup">
+    <div class="popup-titlebar">
+      <span>💌 Letter 1</span>
+      <button class="popup-close" onclick="closePopup('letter1-popup')">✕</button>
+    </div>
+    <div class="popup-body">
+      <p class="letter-body">Dear Louie,
+
+    Heya! I hope you’re doing well wherever you are now. It’s been a while since we last spoke, which also, if I remember correctly, was the last time I saw you. Time flies so fast when you’re on a break, but even when the ship stops, the waves around it never still, and I am now slowly forgetting the faces of the waves I’ve encountered in the past. Everything is slowly becoming a blur, or already has been completely, but what you’ve given me, every single thing in that envelope, flushed a wave of memory back to my almost-mush brain, and stayed in the crevice that wants to remember and never wishes to forget.
+   
+    I never in a thousand years expected that you would leave me something. I thought the talk that we had outside our lounge was the end of it. If that was our farewell, it would have been the most generous one I’ve ever gotten since I stepped foot in college. Most acquaintanceships in Silliman just stop, no more pennies to spare to feed the slot machine, so you can only be afforded an abrupt end. So what we shared that day was one for the books.
+   
+    My mind was completely empty when I went to see Ma’am Marlin a few weeks after the end of the term. I don’t even know why I stopped at the lounge, but I did anyway. And when she told me you left something and handed me the envelope, it took every ounce of will in my body not to pry it open there and then. I guess that was proof that even though we shared a generous farewell, it was not enough. I opened it that afternoon, and I hadn’t even gotten through your letter yet, but I was already shedding a few tears (for the benefit of my self-imposed, failure of a stoic image, I must say I may have, or MAY NOT have, shed a few tears). The Elmo quote was the culprit; he is always at the scene of the crime.
+   
+    To tell you the truth, although I deem myself a very introspective person (fueled by undiagnosed anxiety and OCD), I have mostly been critical about the things that I have done wrong and not those that I’ve done right. I have not been even remotely conscious of all the possible good things that I have done and how they may have affected people. So the Elmo quote really struck a nerve and made me realize that I’ve been beating myself up, almost to a pulp, because I was not able to recognize that even the things I did, the ones I didn’t pay much attention to, have made an impact on other people. An impact that would prompt someone to leave me an envelope that would make me a sobbing mess on my bed in the scorching heat of the Philippine summer.
+   
+    It reminded me of something I read when I was younger, that people are so afraid of the idea of going back in time because even the smallest thing can change the present, but not everyone in the present is willing to do tiny good things to change the future.
+   
+    I depleted all the possible ways I could get to you. I couldn’t send you anything back as I don’t know where you are, and I absolutely do not wish to doxx anyone, and well, I also couldn’t give you anything in person, so I resorted to what I know. I never thought I’d ever code again after leaving I.T., but I guess I was wrong.
+   
+    I hope you don’t think I’m doing this because you gave me something, or that I’m forced to reciprocate. I’m doing this because I want to, and because there was also a time when I daydreamed about cheesecakes and getting drunk, but then I realized the real thing is just better than the immersive thought, and maybe I should take the step to go out to help my sweet tooth and get face-flat wasted.
+  </p>
+    </div>
+  </div>
+
+  <div class="popup" id="letter2-popup">
+    <div class="popup-titlebar">
+      <span>✉️ Letter 2</span>
+      <button class="popup-close" onclick="closePopup('letter2-popup')">✕</button>
+    </div>
+    <div class="popup-body">
+      <p class="letter-body">Hey, again. I don’t want to talk your ear off (if that’s even possible in this medium), so I’ll try to keep it less flowery (if I can).
+    
+    I’m not sure which interaction came first: the one where we played cards with Jecinth at the lounge, where she pretty much interrogated us, or the one at the museum where I told you that you looked cool and that I had always wanted to interact with you. If my memory serves me right, it’s the former. But either way, I cherish both of those moments the same. For one, at the time, I was still gauging my environment. I had previously concluded that the reason why I never conjured a long and lasting friendship in my previous program was due to me being a bit unapproachable (as my now-friends say). I knew I always somehow had that air around me, I cannot help it, I don’t like a lot of people, but I liked you, and I wanted to know more about you, and I truly enjoyed the moments that I shared with you.
+    
+    And I wish I could get that through your noggin: that I walked a little lighter after we played Dungeon Mayhem because I was able to spend my time with someone I genuinely enjoyed hanging out with. At the back of my mind, I always had moments where I wanted to ask you if we could play again, but I was too afraid to ask. Just like you thought, I also believed that you wouldn’t want to waste your time doing the same thing. You were always the first person in and out of class; I saw that you valued your time well, and I didn’t want to be the reason you wasted it. So, I didn’t ask, and just wished that you would. I regret putting that responsibility on you. As I write this, I ponder the possibilities. What if I had just asked for another game, regardless of your response? At least I would have put in the effort to show you that I, too, was interested. But all I can do now is look back.
+    
+    Every time I dropped by the lounge while you were there, I wanted to ask you how you were, but oftentimes you’d be on your phone, or have your headset on, or maybe you just looked like you didn’t want to be disturbed, so I never tried. I never want to be an inconvenience. But know that in the moments where we actually dropped everything to speak to one another, I cherished it, and by your words, I saw it as an act of grace.
+    
+    You might not think the same, but I will say it: I think you and I are alike. Although you might see me around, rubbing shoulders and hanging out with people from the department, I only actually see one as my friend, someone I talk to outside of school, someone I can confide in. The rest are just confetti. I also only have one person, whom I have known since elementary school, who I can say is my best friend. The rest are just people I know. Once upon a time, I wanted more, and when I saw that glimmering light at the end of the tunnel pointing me toward more people, I took the chance to be amiable. But then again, you realize in the long run that more is not always great, and I realized what I truly wanted was just stability. It was in that search for stability that I started seeing parts of me in you.  I always wanted to be the first one in and out (although people hold me back), I barely talk unless spoken to, and I have a hard time thinking of things to say, but when I do find something interesting, I can barely stop talking. It’s hard for me to tell when I’m friends with someone unless they say it to my face, and sometimes, well, most of the time, I just want to blend in and not stand out from the crowd. And I guess that’s why I liked you. We were more alike than we were different.
+   
+    I hope that in your next voyage, you’ll take the steps we never took, the words we never spoke, the questions we never asked, and just stop merely pondering the possibilities but actively acting on them. I have tried ice cream and I’ve been to a punk party, and although I only enjoyed one of those (hint: it melts), I would have never known the feeling had I not acted on it. So take that step, and I hope it leads you where you want to be.
+    
+    The first time I tried a cheesecake, it was Basque-flavored, and I made it a big deal. Instead of just eating the slice at the shop, I had it wrapped, and I walked from the store to the Boulevard to eat it in front of the waves. And I will tell you this: it was better than anything I could have ever imagined. I can’t say the same about being drunk, what goes down goes back up, it’s totally not as good as a cheesecake, but what I enjoyed the most was the company. The stories, the laughs, the shared light slaps accompanied by out-of-breath cackles, the songs sung using a beer bottle as a mic, the dances, and the jokes that we carry on until the next day. Enjoying a good slice of cake with the company of the ocean waves is fun, and nursing a bottle of alcohol over the company of red-faced, tipsy friends or acquaintances is also fun. I hope you can find the right spot to enjoy your ice cream, and I hope you can find the right people to mosh with at a punk party. I believe you will, because anyone would be so lucky to spend a moment of their fleeting time on earth with you.
+    
+    I wish I had told you from the very beginning that we could be friends, and that I wanted to be friends with you, and that I wanted you to think the same. Maybe we’d have a better ending.
+    
+    Thank you for choosing to spend your time with me, and thank you for all the gifts that you’ve given me. I wish you the best on your next journey, but please, don’t be a stranger!
+    </p>
+  </div>
+  </div>
+
+  <div class="popup" id="stardew-popup">
+    <div class="popup-titlebar">
+      <span>🖼️ Portrait</span>
+      <button class="popup-close" onclick="closePopup('stardew-popup')">✕</button>
+    </div>
+    <div class="popup-body">
+      <img src="portrait2.png" alt="Stardew Portrait" />
+      <img src="avatar.png" alt="Stardew Portrait" />
+      <p style="margin-top:10px; font-size:13px; color:#555; text-align:center;">Tried my best to make it look like you, but my skills are only limited :/</p>
+    </div>
+  </div>
+
+  <div class="popup" id="playlist-popup">
+    <div class="popup-titlebar">
+      <span>🎵 My Playlist</span>
+      <button class="popup-close" onclick="closePopup('playlist-popup')">✕</button>
+    </div>
+    <div class="popup-body" style="background: #d4d0c8; padding: 12px; font-family: 'Courier New', monospace;">
+      <div style="background: white; border: 2px inset #808080; height: 160px; overflow-y: auto; margin-bottom: 12px;">
+        <div id="song-list"></div>
+      </div>
+
+      <div style="background: #5a5a5a; border-radius: 20px; padding: 20px; max-width: 380px; margin: 12px auto 0; display: flex; gap: 16px; align-items: center; box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 3px 3px 8px rgba(0,0,0,0.5);">
+        <div style="background: #1a1a1a; border-radius: 8px; padding: 10px; width: 180px; flex-shrink: 0; border: 2px solid #333;">
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+            <div style="width: 52px; height: 52px; background: #333; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px;">🎵</div>
+            <div style="overflow: hidden;">
+              <p id="now-playing-title" style="font-size: 11px; font-weight: bold; color: white; margin: 0; line-height: 1.3; word-break: break-word;">Select a song</p>
+              <p style="font-size: 10px; color: #aaa; margin: 2px 0 0;">My Playlist</p>
+            </div>
+          </div>
+          <div style="background: #333; height: 3px; border-radius: 2px; overflow: hidden; margin-bottom: 4px;">
+            <div id="progress-bar" style="background: white; height: 3px; width: 0%; transition: width 0.5s linear;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span id="time-current" style="font-size: 9px; color: #aaa;">0:00</span>
+            <span id="time-total" style="font-size: 9px; color: #aaa;">0:00</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div style="position: relative; width: 130px; height: 130px;">
+            <div style="width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #4a4a4a, #222); border: 2px solid #111; position: absolute;"></div>
+            <div onclick="skipBack()" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: white; font-size: 10px; cursor: pointer; z-index: 2;">MUSIC</div>
+            <div onclick="togglePlay()" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); color: white; font-size: 14px; cursor: pointer; z-index: 2;">▶︎</div>
+            <div onclick="skipBack()" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: white; font-size: 14px; cursor: pointer; z-index: 2;">⏮</div>
+            <div onclick="skipForward()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: white; font-size: 14px; cursor: pointer; z-index: 2;">⏭</div>
+            <div onclick="togglePlay()" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle at 38% 35%, #555, #222); border: 2px solid #111; cursor: pointer; z-index: 3;"></div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1px; width: 160px;">
+            <span style="font-size: 10px; color: #aaa;">🔈</span>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" oninput="setVolume(this.value)" style="flex: 1; accent-color: #888; height: 3px;" />
+            <span style="font-size: 10px; color: #aaa;">🔊</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup" id="Shows-popup">
+    <div class="popup-titlebar">
+      <span>📺 Shows Recommendations</span>
+      <button class="popup-close" onclick="closePopup('Shows-popup')">✕</button>
+    </div>
+     
+    <div class="popup-body">
+      <p style="background-color: white; text-align: center; font-size: 13px; margin-bottom: 20px;" >Just a list of shows you might like! 
+        All of these have the same overarching theme which are found family and friendship.
+        When I feel a bit down or when I miss some company, these are the shows I turn to for comfort. I hope you find some comfort in them too!
+      </p>
+      <div class="Shows-item">
+        <img src="mob.jpg" alt="Mob Psycho 100" />
+        <p><strong>Mob Psycho 100</strong><br/>Follows a story of a young shy boy with psychic powers as he overcomes many adversities in his life.
+        This show explores themes of identity and self-acceptance that made me want to change things about myself too. It's a chill and engaging watch! An absolute fave.</p>
+      </div>
+      <div class="Shows-item">
+        <img src="bocchi.jpg" alt="Bocchi the Rock!" />
+        <p><strong>Bocchi the Rock!</strong><br/>This one is a story of a girl with social anxiety who joins a school band and learns to overcome her fears.
+        It's a really funny watch, and some of the scenes made me feel like I was looking through a mirror. Also one of my all-time favorites!</p>
+      </div>
+      <div class="Shows-item">
+        <img src="saiki.jpg" alt="The Disastrous Life of Saiki K." />
+        <p><strong>The Disastrous Life of Saiki K.</strong><br/>You've probably already seen clips of this show around social media, which is how I discovered it. 
+          It's a hilarious show that also has a psychic lead. Each episode has a different assortment of plots so it's always a surprise!</p>
+      </div>
+      <div class="Shows-item">
+        <img src="shadows.jpg" alt="What We Do in the Shadows" />
+        <p><strong>What We Do in the Shadows</strong><br/>This is the only show in the list that is not an anime or cartoon. This is also one of my all-time faves and I always rewatch it every year.
+        It's a mockumentary-style comedy show that follows a group of vampire roommates and their familiar. It pretty much answers the question, "What if vampires were stupid?" lol. </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup" id="flower-popup">
+    <div class="popup-titlebar">
+      <span>🌸 A Flower for You</span>
+      <button class="popup-close" onclick="closePopup('flower-popup')">✕</button>
+    </div>
+    <div class="popup-body">
+      <img src="flowers1.png" alt="Flower" />
+      <p style="margin-top:12px; font-size:13px; color:#555;">Since I can't give you a real one.</p>
+    </div>
+  </div>
+
+  <script>
+    function openPopup(id) {
+      closeAll();
+      document.getElementById(id).classList.add('active');
+      document.getElementById('overlay').classList.add('active');
+    }
+
+    function closePopup(id) {
+      document.getElementById(id).classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+      if (id === 'playlist-popup') { player.pause(); isPlaying = false; }
+    }
+
+    function closeAll() {
+      document.querySelectorAll('.popup').forEach(p => p.classList.remove('active'));
+      document.getElementById('overlay').classList.remove('active');
+      player.pause(); isPlaying = false;
+    }
+
+    function logout() {
+      window.location.href = 'Proj 1.html?fromcomputer=true';
+    }
+
+    const songs = [
+      { title: "White Sandy Beach Of Hawai'i", file: "music/White Sandy Beach Of Hawaii.mp3" },
+      { title: "Be Wherever You Are",          file: "music/Be Wherever You Are.mp3" },
+      { title: "Sweet Time",                   file: "music/Sweet Time.mp3" },
+      { title: "Don't Dream It's Over",        file: "music/Dont Dream Its Over.mp3" },
+      { title: "Somewhere Only We Know",       file: "music/Somewhere Only We Know.mp3" },
+      { title: "Downtown",                     file: "music/Downtown.mp3" },
+      { title: "Don't Know Why",               file: "music/Dont Know Why.mp3" },
+      { title: "In My Life",                   file: "music/In My Life.mp3" },
+      { title: "Love Like You",                file: "music/Love Like You.mp3" },
+      { title: "Dance of the Moonlight Jellies", file: "music/Dance of the Moonlight Jellies.mp3" },
+      { title: "Grandpa's Theme",              file: "music/Grandpas Theme.mp3" },
+    ];
+
+    const player = document.getElementById('audio-player');
+    let currentSong = -1;
+    let isPlaying = false;
+
+    function buildPlaylist() {
+      const list = document.getElementById('song-list');
+      songs.forEach((song, index) => {
+        const item = document.createElement('div');
+        item.id = 'song-item-' + index;
+        item.style.cssText = 'padding: 6px 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 12px; font-family: Courier New, monospace; display: flex; align-items: center; gap: 8px; background: white; color: black;';
+        item.innerHTML = `<span style="color:#888; min-width:16px;">${index + 1}.</span> ${song.title}`;
+        item.onclick = () => playSong(index);
+        item.onmouseover = () => { if (currentSong !== index) item.style.background = '#d0e8ff'; };
+        item.onmouseout = () => { if (currentSong !== index) item.style.background = 'white'; };
+        list.appendChild(item);
+      });
+    }
+
+    function playSong(index) {
+      if (currentSong >= 0) {
+        const old = document.getElementById('song-item-' + currentSong);
+        if (old) { old.style.background = 'white'; old.style.color = 'black'; }
+      }
+
+      currentSong = index;
+
+      const current = document.getElementById('song-item-' + index);
+      if (current) { current.style.background = '#000080'; current.style.color = 'white'; }
+
+      document.getElementById('now-playing-title').textContent = songs[index].title;
+
+      player.pause();
+      player.src = songs[index].file;
+      player.load();
+      player.play().then(() => {
+        isPlaying = true;
+      }).catch(err => {
+        console.error('Play failed:', err);
+        isPlaying = false;
+      });
+    }
+
+    player.ontimeupdate = () => {
+      if (player.duration) {
+        const pct = (player.currentTime / player.duration) * 100;
+        document.getElementById('progress-bar').style.width = pct + '%';
+        document.getElementById('time-current').textContent = formatTime(player.currentTime);
+        document.getElementById('time-total').textContent = formatTime(player.duration);
+      }
+    };
+
+    player.onended = () => skipForward();
+
+    function togglePlay() {
+      if (currentSong === -1) { playSong(0); return; }
+      if (isPlaying) { player.pause(); isPlaying = false; }
+      else { player.play(); isPlaying = true; }
+    }
+
+    function skipForward() {
+      playSong((currentSong + 1) % songs.length);
+    }
+
+    function skipBack() {
+      playSong((currentSong - 1 + songs.length) % songs.length);
+    }
+
+    function setVolume(val) { player.volume = val; }
+
+    function formatTime(secs) {
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60).toString().padStart(2, '0');
+      return m + ':' + s;
+    }
+
+    buildPlaylist();
+
+    window.addEventListener('load', () => {
+      const junimo = document.getElementById('loading-junimo');
+      junimo.style.animation = 'bounce 0.6s ease infinite';
+
+      setTimeout(() => {
+        const screen = document.getElementById('loading-screen');
+        screen.style.transition = 'opacity 1s ease';
+        screen.style.opacity = '0';
+        setTimeout(() => { screen.style.display = 'none'; }, 1000);
+      }, 3000);
+    });
+  </script>
+
+</body>
+</html>
